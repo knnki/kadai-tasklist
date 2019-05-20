@@ -13,8 +13,8 @@ class TasksTableSeeder extends Seeder
     {
 
         for($i = 1; $i <= 100; $i++) {
-            DB::table('messages')->insert([
-                'title' => 'test title ' . $i,
+            DB::table('tasks')->insert([
+                'status' => 'status' . $i,
                 'content' => 'test content ' . $i
             ]);
         }

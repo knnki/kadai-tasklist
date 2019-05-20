@@ -8,7 +8,7 @@
     </head>
 
     <body>
-
+        @include('commons.error_messages')
         @include('commons.navbar')
         
         <div class="container">

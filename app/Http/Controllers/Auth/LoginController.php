@@ -25,7 +25,8 @@ class LoginController extends Controller
      *
      * @var string
      */
-    protected $redirectTo = '/home';
+     //ロ議員認証が成功した時のリダイレクト先URL
+    protected $redirectTo = '/';
 
     /**
      * Create a new controller instance.

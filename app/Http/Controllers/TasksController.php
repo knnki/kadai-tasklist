@@ -11,11 +11,29 @@ class tasksController extends Controller
     // getでtasks/にアクセスされた場合の「一覧表示処理」
     public function index()
     {
-        $tasks = Task::orderBy('id', 'desc')->paginate(25);
-
-        return view('tasks.index', [
-            'tasks' => $tasks,
-        ]);
+        $data = [];
+        if (\Auth::check()) {
+            $user = \Auth::user();
+            $tasks = $user->tasks()->paginate();
+           //$tasks = $user->tasks()->orderBy('created_at', 'desc')->paginate(25);
+            
+            
+            $data = [
+                'user' => $user,
+                'tasks' => $tasks,
+            ];
+        
+            //$tasks = Task::orderBy('id', 'desc')->paginate(25);
+            
+            return view('tasks.index', [
+                'tasks' => $tasks,
+            ]);
+            
+        }
+        
+        return view('welcome', $data);
+        
+        
     }
 
     // getでtasks/createにアクセスされた場合の「新規登録画面表示処理」
@@ -32,12 +50,14 @@ class tasksController extends Controller
     public function store(Request $request)
     {
         $this->validate($request, [
+            'user_id' => 'required|max:11', //2019.6.11追加
             'status' => 'required|max:10', 
             'content' => 'required|max:191',
         ]);
         
         
         $task = new Task;
+        $task->user_id = $request->user_id;//2019.6.11追加
         $task->status = $request->status;
         $task->content = $request->content;
         $task->save();
@@ -69,11 +89,13 @@ class tasksController extends Controller
     public function update(Request $request, $id)
     {
         $this->validate($request, [
+            'user_id' => 'required|max:11', //2019.6.11追加
             'status' => 'required|max:10', 
             'content' => 'required|max:191',
         ]);
         
         $task = Task::find($id);
+        $task->user_id = $request->user_id;//2019.6.11追加
         $task->status = $request->status;
         $task->content = $request->content;
         $task->save();

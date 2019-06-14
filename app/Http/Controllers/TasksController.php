@@ -13,21 +13,22 @@ class tasksController extends Controller
     {
         $data = [];
         if (\Auth::check()) {
-            $user = \Auth::user();
-            $tasks = $user->tasks()->paginate();
-           //$tasks = $user->tasks()->orderBy('created_at', 'desc')->paginate(25);
+           
+                $user = \Auth::user();
+                $tasks = $user->tasks()->paginate();
+               //$tasks = $user->tasks()->orderBy('created_at', 'desc')->paginate(25);
             
+                $data = [
+                    'user' => $user,
+                    'tasks' => $tasks,
+                ];
             
-            $data = [
-                'user' => $user,
-                'tasks' => $tasks,
-            ];
-        
             //$tasks = Task::orderBy('id', 'desc')->paginate(25);
             
             return view('tasks.index', [
                 'tasks' => $tasks,
             ]);
+            
             
         }
         
@@ -69,36 +70,46 @@ class tasksController extends Controller
     public function show($id)
     {
         $task = Task::find($id);
-
-        return view('tasks.show', [
-            'task' => $task,
-        ]);
+        if (\Auth::id() === $task->user_id) {
+            return view('tasks.show', [
+                'task' => $task,
+            ]);
+        }else{
+            return redirect('/');
+        }
     }
 
     // getでtasks/id/editにアクセスされた場合の「更新画面表示処理」
     public function edit($id)
     {
+        
         $task = Task::find($id);
-
-        return view('tasks.edit', [
-            'task' => $task,
-        ]);
+        if (\Auth::id() === $task->user_id) {
+            return view('tasks.edit', [
+                'task' => $task,
+            ]);
+        }else{
+            return redirect('/');
+        }
     }
 
     // putまたはpatchでtasks/idにアクセスされた場合の「更新処理」
     public function update(Request $request, $id)
     {
-        $this->validate($request, [
-            'user_id' => 'required|max:11', //2019.6.11追加
-            'status' => 'required|max:10', 
-            'content' => 'required|max:191',
-        ]);
-        
         $task = Task::find($id);
-        $task->user_id = $request->user_id;//2019.6.11追加
-        $task->status = $request->status;
-        $task->content = $request->content;
-        $task->save();
+        if (\Auth::id() === $task->user_id) {
+            $this->validate($request, [
+                'user_id' => 'required|max:11', //2019.6.11追加
+                'status' => 'required|max:10', 
+                'content' => 'required|max:191',
+            ]);
+        
+            $task = Task::find($id);
+            $task->user_id = $request->user_id;//2019.6.11追加
+            $task->status = $request->status;
+            $task->content = $request->content;
+            $task->save();
+        }
 
         return redirect('/');
     }
@@ -108,8 +119,11 @@ class tasksController extends Controller
     public function destroy($id)
     {
         $task = Task::find($id);
-        $task->delete();
-
+        if (\Auth::id() === $task->user_id) {
+           $task->delete();
+        }else{
+            return redirect('/');
+        }
         return redirect('/');
     }
 }
